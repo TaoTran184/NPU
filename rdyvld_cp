@@ -1,0 +1,33 @@
+
+module rdyvld_rtl_cp #(
+
+parameter DWIDTH=32,
+parameter DIS_ASSERTION=0
+)( input clk
+input rst,
+input valid,
+input ready,
+input [DWIDTH-1:0] data
+);
+
+`ifndef DISABLE_RTL_CP
+property prop_rdy10;            @(posedge clk) disable iff (rst) !valid |->##0ready |->##1 !ready; endproperty
+property prop_vld01_rdy01;      @(posedge (clk) disable iff (rst) !valid |->##0 !ready |->##1 valid |->#00 ready endproperty
+property prop_vld10_rdy10;      @posedge clk) disable iff (rst) valid |->##0 ready |->##1 !valid |->##0 !ready; endproperty
+property prop_vld011_rdy001;    @((posedge clk) disable iff (rst) !valid |->##0 !ready |->##1 valid |->##0 !ready |->##1 valid |->##0 ready; endproperty
+property prop_vld001_rdy011;    @(posedge clk) disable iff (rst) !ready |->##0 !valid |->##1 ready |->##0 !valid |-> ##1 ready |->##0 valid; endproperty
+property prop_vld0001_rdy0111;  @(posedge clk) disable (rst) !ready |-> ##0 !valid |-> ##1 ready|->##0 !valid \->##1 ready |->##0 !calid |->##1 ready |->##0 valid; endproperty
+property prop_vld011_rdy110; @(posedge clk) disable iff (rst) ready |->##0 !valid |->##1valid |->##0 ready |->##1valid |->##0 !rready; endproperty
+property prop_vld0111_rdy1110; @(posedge clk) disable iff (rst) ready |->##0 !valid |->##1 valid |->##0 ready |-> ##1 valid |->##0 ready |-> ##1 valid |->##0 !ready; endproperty
+property prop_vld01111_rdy11110; @(posedge clk) disable iff (rst) ready |->##0 !valid |->##1 valid |->##ready |->##1 valid |->##0 ready |->##1 valid |->##0 ready |->##1 valid |->##0 !ready; endproperty
+
+property prop_vld10_rdy0x;      @(posedge clk) disable iff (rst) (valid & !ready) |->##1 valid; endproperty
+property prop_data_stb_unil_rdy; @(posedge clk) disable iff (rst) (valid & !ready) |-> ##1 $stable(rdata); endproperty. 
+
+cp_rdyvlad10  : cover property (prop_rdy10);
+
+`endif
+
+endmodule
+
+
